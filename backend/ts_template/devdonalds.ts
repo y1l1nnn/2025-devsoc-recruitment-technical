@@ -64,7 +64,7 @@ const parse_handwriting = (recipeName: string): string | null => {
 // [TASK 2] ====================================================================
 // Endpoint that adds a CookbookEntry to your magical cookbook
 app.post("/entry", (req:Request, res:Response) => {
-  const { entry } = req.body;
+  const entry = req.body;
   
   if (entry.type !== "recipe" && entry.type !== "ingredient") {
     res.status(400).send("entry cannot be added to cookbook");
@@ -78,13 +78,15 @@ app.post("/entry", (req:Request, res:Response) => {
     res.status(400).send("entry cannot be added to cookbook");
     return;
   }
-  const reqItems = new Set();
-  for (const item of entry.requiredItems) {
-    if (item.quantity <= 0 || reqItems.has(item.name)) {
-      res.status(400).send("entry cannot be added to cookbook");
-      return;
+  if (entry.name === "recipe") {
+    const reqItems = new Set();
+    for (const item of entry.requiredItems) {
+      if (item.quantity <= 0 || reqItems.has(item.name)) {
+        res.status(400).send("entry cannot be added to cookbook");
+        return;
+      }
+      reqItems.add(item.name);
     }
-    reqItems.add(item.name);
   }
   let newEntry: recipe | ingredient;
   if (entry.type === "recipe") {
