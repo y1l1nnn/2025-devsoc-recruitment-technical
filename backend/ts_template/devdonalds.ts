@@ -26,7 +26,7 @@ const app = express();
 app.use(express.json());
 
 // Store your recipes here!
-const cookbook: any = null;
+const cookbook: (recipe | ingredient)[] = [];
 
 // Task 1 helper (don't touch)
 app.post("/parse", (req:Request, res:Response) => {
@@ -64,9 +64,44 @@ const parse_handwriting = (recipeName: string): string | null => {
 // [TASK 2] ====================================================================
 // Endpoint that adds a CookbookEntry to your magical cookbook
 app.post("/entry", (req:Request, res:Response) => {
-  // TODO: implement me
-  res.status(500).send("not yet implemented!")
-
+  const { entry } = req.body;
+  
+  if (entry.type !== "recipe" && entry.type !== "ingredient") {
+    res.status(400).send("entry cannot be added to cookbook");
+    return;
+  }
+  if (entry.type === "ingredient" && entry.cookTime < 0) {
+    res.status(400).send("entry cannot be added to cookbook");
+    return;
+  }
+  if (cookbook.some(e => e.name === entry.name)) {
+    res.status(400).send("entry cannot be added to cookbook");
+    return;
+  }
+  const reqItems = new Set();
+  for (const item of entry.requiredItems) {
+    if (item.quantity <= 0 || reqItems.has(item.name)) {
+      res.status(400).send("entry cannot be added to cookbook");
+      return;
+    }
+    reqItems.add(item.name);
+  }
+  let newEntry: recipe | ingredient;
+  if (entry.type === "recipe") {
+    newEntry = {
+      name: entry.name,
+      type: "recipe",
+      requiredItems: entry.requiredItems
+    }
+  } else {
+    newEntry = {
+      name: entry.name,
+      type: "ingredient",
+      cookTime: entry.cookTime 
+    }
+  }
+  cookbook.push(newEntry);
+  res.status(200).send();
 });
 
 // [TASK 3] ====================================================================
