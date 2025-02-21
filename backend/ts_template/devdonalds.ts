@@ -19,6 +19,12 @@ interface ingredient extends cookbookEntry {
   cookTime: number;
 }
 
+interface recipeSummary {
+  name: string; 
+  cookTime: number; 
+  ingredients: requiredItem[];
+}
+
 // =============================================================================
 // ==== HTTP Endpoint Stubs ====================================================
 // =============================================================================
@@ -67,22 +73,22 @@ app.post("/entry", (req:Request, res:Response) => {
   const entry = req.body;
   
   if (entry.type !== "recipe" && entry.type !== "ingredient") {
-    res.status(400).send("entry cannot be added to cookbook");
+    res.status(400).send("invalid type");
     return;
   }
   if (entry.type === "ingredient" && entry.cookTime < 0) {
-    res.status(400).send("entry cannot be added to cookbook");
+    res.status(400).send("cookTime cannot be negative");
     return;
   }
   if (cookbook.some(e => e.name === entry.name)) {
-    res.status(400).send("entry cannot be added to cookbook");
+    res.status(400).send("entry names must be unique");
     return;
   }
   if (entry.name === "recipe") {
     const reqItems = new Set();
     for (const item of entry.requiredItems) {
       if (item.quantity <= 0 || reqItems.has(item.name)) {
-        res.status(400).send("entry cannot be added to cookbook");
+        res.status(400).send("requiredItems can only have one element per name");
         return;
       }
       reqItems.add(item.name);
@@ -108,10 +114,60 @@ app.post("/entry", (req:Request, res:Response) => {
 
 // [TASK 3] ====================================================================
 // Endpoint that returns a summary of a recipe that corresponds to a query name
-app.get("/summary", (req:Request, res:Request) => {
-  // TODO: implement me
-  res.status(500).send("not yet implemented!")
 
+function recurseRecipes(item:requiredItem, res:Response, summary:recipeSummary, quantity:number) {
+
+  const currItem = cookbook.find(e => e.name === item.name);
+  if (currItem === undefined) {
+    res.status(400).send("recipe not found");
+    return;
+  }
+
+  if (currItem.type === "ingredient") {
+    // Add to total cooktime 
+    const currIngredient = currItem as ingredient;
+    summary.cookTime = (item.quantity * currIngredient.cookTime) * quantity;
+
+    // Add ingredient quantity to summary
+    const existingIngredient = summary.ingredients.find(i => i.name === item.name);
+
+    if (existingIngredient) {
+      existingIngredient.quantity += item.quantity * quantity;
+    } else {
+      const addIngredient: requiredItem = {
+        name: item.name,
+        quantity: item.quantity * quantity
+      }
+      summary.ingredients.push(addIngredient);
+    }
+  }
+  
+  if (currItem.type === "recipe") {
+    const currRecipe = currItem as recipe;
+    for (const subItem of currRecipe.requiredItems) {
+      recurseRecipes(subItem, res, summary, item.quantity * quantity);
+    }
+  }
+}
+
+app.get("/summary", (req:Request, res:Response) => {
+  const recipeName = req.query.name as string;
+
+  const reqRecipe = cookbook.find(r => r.name === recipeName);
+  if (reqRecipe === undefined || reqRecipe.type === "ingredient") {
+    res.status(400).send("recipe not found");
+    return;
+  }
+  const summary: recipeSummary = {
+    name: recipeName,
+    cookTime: 0,
+    ingredients: []
+  }
+  const recipeQuantity = 1;
+  for (let currItem of (reqRecipe as recipe).requiredItems) {
+    recurseRecipes(currItem, res, summary, recipeQuantity);
+  }
+  res.status(200).send();
 });
 
 // =============================================================================
