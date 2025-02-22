@@ -44,3 +44,48 @@ button {
     align-items: center;
     justify-content: center;
 }
+
+body {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    line-height: 1.5px;
+    letter-spacing: 1px;
+}
+
+.Search {
+    display: flex;
+    align-items: center;
+}
+
+.filterButton, .sortButton {
+    display: flex;
+    flex-direction: row;
+    height: 35px;
+    width: 120px;
+    align-self: center;
+    justify-items: center;
+    position: relative;
+    border-color: #ef6c00;
+    border-style: solid;
+    border-radius: 10px;
+    z-index: 10;
+    top: 10px;
+}
+
+.sortButton {
+    position: absolute;
+    top: 77px;
+    right: 10px;
+}
+
+#filterIcon, #sortIcon {
+    display: inline-block;
+    margin-block-start: 2px;
+    margin-inline-start: 5px;
+}
+
+#filterText, #sortText {
+    display: inline-block;
+    color: #F77F00;
+    font-weight: bold;
+    margin-left: 8px;
+}
