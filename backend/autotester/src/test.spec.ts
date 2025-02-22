@@ -1,4 +1,5 @@
 const request = require("supertest");
+// const { cookbook } = require('../../ts_template/devdonalds');
 
 describe("Task 1", () => {
   describe("POST /parse", () => {
@@ -138,7 +139,7 @@ describe("Task 3", () => {
       expect(resp2.status).toBe(400);
     });
 
-    it("Bro cooked", async () => {
+    it("Bro cooked - one ingredient", async () => {
       const meatball = {
         type: "recipe",
         name: "Skibidi",
@@ -156,6 +157,146 @@ describe("Task 3", () => {
 
       const resp3 = await getTask3("Skibidi");
       expect(resp3.status).toBe(200);
+      expect(resp3.body).toStrictEqual({
+        name: "Skibidi",
+        cookTime: 2,
+        ingredients: [{name: "Bruh", quantity: 1}],
+      });
     });
+
+    it("Bro cooked - large quantities", async () => {
+      await postEntry({
+        type: "ingredient",
+        name: "Sugar",
+        cookTime: 1,
+      });
+    
+      await postEntry({
+        type: "recipe",
+        name: "Cake",
+        requiredItems: [{ name: "Sugar", quantity: 1000 }],
+      });
+    
+      const resp = await getTask3("Cake");
+      expect(resp.status).toBe(200);
+      expect(resp.body).toStrictEqual({
+        name: "Cake",
+        cookTime: 1000,
+        ingredients: [{ name: "Sugar", quantity: 1000 }],
+      });
+    });
+    
+    it.skip("Bro cooked - multiple ingredients", async () => {
+      const resp1 = await postEntry({
+        type: "ingredient",
+        name: "Tomato",
+        cookTime: 2,
+      });
+      expect(resp1.status).toBe(200);
+    
+      const resp2 = await postEntry({
+        type: "ingredient",
+        name: "Cheese",
+        cookTime: 3,
+      });
+      expect(resp2.status).toBe(200);
+    
+      const resp3 = await postEntry({
+        type: "recipe",
+        name: "Pizza",
+        requiredItems: [
+          { name: "Tomato", quantity: 1 },
+          { name: "Cheese", quantity: 2 },
+        ],
+      });
+      expect(resp3.status).toBe(200);
+    
+      const resp = await getTask3("Pizza");
+      expect(resp.status).toBe(200);
+      expect(resp.body).toStrictEqual({
+        name: "Pizza",
+        cookTime: 8, 
+        ingredients: [
+          { name: "Tomato", quantity: 1 },
+          { name: "Cheese", quantity: 2 },
+        ],
+      });
+    });  
+
+    it.skip("Bro cooked - multiple ingredients (recursion)", async () => {
+      const resp1 = await postEntry({
+        type: "ingredient",
+        name: "Beef",
+        cookTime: 5,
+      });
+      expect(resp1.status).toBe(200);
+
+      const resp2 = await postEntry({
+        type: "ingredient",
+        name: "Egg",
+        cookTime: 3,
+      });
+      expect(resp2.status).toBe(200);
+
+      const resp3 = await postEntry({
+        type: "ingredient",
+        name: "Flour",
+        cookTime: 0,
+      });
+      expect(resp3.status).toBe(200);
+
+      const resp4 = await postEntry({
+        type: "ingredient",
+        name: "Tomato",
+        cookTime: 2,
+      });
+      expect(resp4.status).toBe(200);
+
+      const resp5 = await postEntry({
+        type: "recipe",
+        name: "Meatball",
+        requiredItems: [
+          { name: "Beef", quantity: 2 },
+          { name: "Egg", quantity: 1 },
+        ],
+      });
+      expect(resp5.status).toBe(200);
+
+      const resp6 = await postEntry({
+        type: "recipe",
+        name: "Pasta",
+        requiredItems: [
+          { name: "Flour", quantity: 3 },
+          { name: "Egg", quantity: 1 },
+        ],
+      });
+      expect(resp6.status).toBe(200);
+
+      const spaghetti = {
+        type: "recipe",
+        name: "Skibidi Spaghetti",
+        requiredItems: [
+          { name: "Meatball", quantity: 3 },
+          { name: "Pasta", quantity: 1 },
+          { name: "Tomato", quantity: 2 },
+        ],
+      };
+      const resp8 = await postEntry(spaghetti);
+      expect(resp8.status).toBe(200);
+      
+      const resp9 = await getTask3("Skibidi Spaghetti");
+      console.log(resp9.body);
+      expect(resp9.body).toStrictEqual({
+        name: "Skibidi Spaghetti", 
+        cookTime: 46,
+        ingredients: [
+          {name: "Beef", quantity: 6},
+          {name: "Egg", quantity: 4},
+          {name: "Flour", quantity: 3},
+          {name: "Tomato", quantity: 2},
+        ],
+      });
+      expect(resp9.status).toBe(200);
+    });  
   });
 });
