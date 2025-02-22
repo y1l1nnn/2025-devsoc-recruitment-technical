@@ -32,7 +32,8 @@ const app = express();
 app.use(express.json());
 
 // Store your recipes here!
-const cookbook: (recipe | ingredient)[] = [];
+export const cookbook: (recipe | ingredient)[] = [];
+// module.exports = { cookbook };
 
 // Task 1 helper (don't touch)
 app.post("/parse", (req:Request, res:Response) => {
@@ -115,28 +116,25 @@ app.post("/entry", (req:Request, res:Response) => {
 // [TASK 3] ====================================================================
 // Endpoint that returns a summary of a recipe that corresponds to a query name
 
-function recurseRecipes(item:requiredItem, res:Response, summary:recipeSummary, quantity:number) {
+function recurseRecipes(item:requiredItem, summary:recipeSummary, quantity:number) {
 
   const currItem = cookbook.find(e => e.name === item.name);
-  if (currItem === undefined) {
-    res.status(400).send("recipe not found");
-    return;
-  }
+  if (currItem === undefined) return false;
 
   if (currItem.type === "ingredient") {
     // Add to total cooktime 
     const currIngredient = currItem as ingredient;
-    summary.cookTime = (item.quantity * currIngredient.cookTime) * quantity;
+    summary.cookTime += currIngredient.cookTime * quantity;
 
     // Add ingredient quantity to summary
     const existingIngredient = summary.ingredients.find(i => i.name === item.name);
 
     if (existingIngredient) {
-      existingIngredient.quantity += item.quantity * quantity;
+      existingIngredient.quantity += quantity;
     } else {
       const addIngredient: requiredItem = {
         name: item.name,
-        quantity: item.quantity * quantity
+        quantity: quantity 
       }
       summary.ingredients.push(addIngredient);
     }
@@ -145,9 +143,12 @@ function recurseRecipes(item:requiredItem, res:Response, summary:recipeSummary, 
   if (currItem.type === "recipe") {
     const currRecipe = currItem as recipe;
     for (const subItem of currRecipe.requiredItems) {
-      recurseRecipes(subItem, res, summary, item.quantity * quantity);
+      if (recurseRecipes(subItem, summary, subItem.quantity * quantity) === false) {
+        return false;
+      }
     }
   }
+  return true;
 }
 
 app.get("/summary", (req:Request, res:Response) => {
@@ -163,11 +164,13 @@ app.get("/summary", (req:Request, res:Response) => {
     cookTime: 0,
     ingredients: []
   }
-  const recipeQuantity = 1;
   for (let currItem of (reqRecipe as recipe).requiredItems) {
-    recurseRecipes(currItem, res, summary, recipeQuantity);
+    if (recurseRecipes(currItem, summary, currItem.quantity) === false) {
+      res.status(400).send("recipe/ingredient not found");
+      return;
+    }
   }
-  res.status(200).send();
+  res.status(200).send(summary);
 });
 
 // =============================================================================
