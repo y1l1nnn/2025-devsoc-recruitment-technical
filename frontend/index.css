@@ -68,7 +68,6 @@ body {
     border-style: solid;
     border-radius: 10px;
     z-index: 10;
-    top: 10px;
 }
 
 .sortButton {
@@ -88,4 +87,45 @@ body {
     color: #F77F00;
     font-weight: bold;
     margin-left: 8px;
+}
+
+.searchBar {
+    display: inline-flex;
+    flex-direction: row;
+    position: relative;
+    vertical-align: top;
+    width: 75%;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+    justify-content: center;
+}
+
+.searchIcon {
+    left: 100px;
+}
+
+.searchInput {
+    height: 25px;
+    width: 75%;
+    box-sizing: content-box;
+    padding: 5px 10px;
+}
+
+input[type="text" i] {
+    padding-inline: 40px;
+}
+
+.buildings {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.buildings img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+    color: transparent;
 }
