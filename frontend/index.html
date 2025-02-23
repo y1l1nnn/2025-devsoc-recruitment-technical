@@ -9,10 +9,20 @@
 
 <body>
     <header class="Header">
-        <div class="freeRoomsLogo">
-            <img srcset="assets/freeRoomsLogo.png" alt="freerooms logo">
+        <div class="freeRoomsLogo" onclick="toggleDoor()">
+            <img id="door" src="assets/freeRoomsLogo.png" alt="freerooms logo">
             <h1>Freerooms</h1>
         </div>
+        <script>
+            function toggleDoor() {
+                const currDoor = document.getElementById("door");
+                if (currDoor.src.endsWith("freeroomsDoorClosed.png")) {
+                    currDoor.src = "assets/freeRoomsLogo.png";
+                } else {
+                    currDoor.src = "assets/freeroomsDoorClosed.png";
+                }
+            }
+        </script>
 
         <div class="navigationMenu">
             <button type="button" class="searchButton">
@@ -102,7 +112,7 @@
                 <input class="searchInput" type="text" placeholder="Search for a building...">
             </div>
         </div>
-
+        <!-- AGSM -->
         <div class="buildings">
             <div class="building">
                 <img srcset="assets/agsm.webp" alt="agsm image">
@@ -123,7 +133,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Ainsworth Building -->
             <div class="building">
                 <img srcset="assets/ainsworth.webp" alt="ainsworth image">
 
@@ -143,7 +153,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Anita B Lawrence -->
             <div class="building">
                 <img srcset="assets/anitab.webp" alt="anita image">
 
@@ -163,7 +173,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Biological Sciences -->
             <div class="building">
                 <img srcset="assets/biologicalScience.webp" alt="biological image">
 
@@ -183,7 +193,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Biological Sciences (West) -->
             <div class="building">
                 <img srcset="assets/biologicalScienceWest.webp" alt="biologicalWest image">
 
@@ -203,7 +213,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Blockhouse -->
             <div class="building">
                 <img srcset="assets/blockhouse.webp" alt="blockhouse image">
 
@@ -223,7 +233,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Business School -->
             <div class="building">
                 <img srcset="assets/businessSchool.webp" alt="business image">
 
@@ -243,7 +253,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Civil Eng -->
             <div class="building">
                 <img srcset="assets/civilBuilding.webp" alt="civil image">
 
@@ -263,7 +273,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Colombo -->
             <div class="building">
                 <img srcset="assets/colombo.webp" alt="colombo image">
 
@@ -283,7 +293,7 @@
                     </div>
                 </div>
             </div>
-
+            <!-- Computer Science & Engineering -->
             <div class="building">
                 <img srcset="assets/cseBuilding.webp" alt="cse image">
 
