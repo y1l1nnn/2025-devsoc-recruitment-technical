@@ -118,9 +118,11 @@ input[type="text" i] {
 
 .buildings {
     position: relative;
+    width: 100%;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 20px;
+    top: 30px;
 }
 
 .buildings img {
@@ -128,4 +130,83 @@ input[type="text" i] {
     width: 100%;
     object-fit: cover;
     color: transparent;
+    border-radius: 10px;
+    box-sizing: inherit;
+}
+
+.building {
+    position: relative;
+    overflow: hidden;
+}
+
+.nameLabel {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: absolute;
+    border-radius: 10px;
+    background-color: #ef6c00;
+    color: white; 
+    padding: 0px 20px;
+    margin: 10px;
+    bottom: 0px;
+    left: 0px;
+    right: 0px;
+    box-sizing: border-box;
+    -webkit-box-pack: justify;
+    -webkit-text-size-adjust: 100%;
+}
+
+@media (max-width: 400px) {
+    .nameLabel {
+        flex-direction: column; 
+    }
+    .rating {
+        justify-content: center; 
+        margin-top: 5px; 
+    }
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: px;
+}
+
+.rating p {
+    display: block;
+    line-height: 1.5px;
+    letter-spacing: 1px;
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.star {
+    width: 20px;
+    height: 20px;
+    fill: rgb(255, 169, 12);
+}
+
+.roomsLabel {
+    display: flex;
+    position: absolute;
+    -webkit-box-pack: center;
+    -webkit-box-align: center;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    top: 0px;
+    right: 0px;
+    padding: 3px 10px;
+    margin: 10px;
+    background-color:#ffffff;
+    font-size: 10px;
+}
+
+.availableDot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: rgb(76, 175, 80);
+    margin-right: 10px;
 }
