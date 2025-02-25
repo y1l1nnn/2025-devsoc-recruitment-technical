@@ -58,9 +58,48 @@ def parse_handwriting(recipeName: str) -> Union[str, None]:
 # Endpoint that adds a CookbookEntry to your magical cookbook
 @app.route('/entry', methods=['POST'])
 def create_entry():
-	# TODO: implement me
-	return 'not implemented', 500
+	entry_data = request.get_json()
+	global cookbook
+	if cookbook is None: cookbook = {}
 
+	entry_type = entry_data.get("type")
+	entry_name = entry_data.get("name")
+
+	if entry_type != "recipe" and entry_type != "ingredient":
+		return jsonify({"error": "invalid type"}), 400
+
+	if entry_name in cookbook:
+		return jsonify({"error": "entry names must be unique"}), 400
+
+	if entry_type == "ingredient":
+		cook_time = entry_data.get("cookTime")
+
+		if cook_time is None or not isinstance(cook_time, int) or cook_time < 0:
+			return jsonify({"error": "cookTime cannot be negative"}), 400
+
+		cookbook[entry_name] = Ingredient(name=entry_name, cook_time=cook_time)
+
+	if entry_type == "recipe":
+		required_items = entry_data.get("requiredItems")
+
+		req_item_names = set()
+		req_items = []
+		for item in required_items:
+			item_name = item.get("name")
+			item_quantity = item.get("quantity")
+
+			if item_quantity is None or not isinstance(item_quantity, int) or item_quantity <= 0:
+				return jsonify({"error": "requiredItems can only have one element per name"}), 400
+			
+			if item_name in req_item_names: 
+				return jsonify({"error": "requiredItems can only have one element per name"}), 400
+
+			req_item_names.add(item_name)
+			req_items.append(RequiredItem(name=item_name, quantity=item_quantity))
+
+		cookbook[entry_name] = Recipe(name=entry_name, required_items=req_items)
+	
+	return "", 200
 
 # [TASK 3] ====================================================================
 # Endpoint that returns a summary of a recipe that corresponds to a query name
