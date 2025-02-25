@@ -21,6 +21,11 @@ class Recipe(CookbookEntry):
 class Ingredient(CookbookEntry):
 	cook_time: int
 
+@dataclass 
+class RecipeSummary():
+	name: str
+	cookTime: int
+	ingredients: List[RequiredItem]
 
 # =============================================================================
 # ==== HTTP Endpoint Stubs ====================================================
@@ -28,7 +33,7 @@ class Ingredient(CookbookEntry):
 app = Flask(__name__)
 
 # Store your recipes here!
-cookbook = None
+cookbook = {}
 
 # Task 1 helper (don't touch)
 @app.route("/parse", methods=['POST'])
@@ -60,7 +65,6 @@ def parse_handwriting(recipeName: str) -> Union[str, None]:
 def create_entry():
 	entry_data = request.get_json()
 	global cookbook
-	if cookbook is None: cookbook = {}
 
 	entry_type = entry_data.get("type")
 	entry_name = entry_data.get("name")
@@ -102,11 +106,63 @@ def create_entry():
 	return "", 200
 
 # [TASK 3] ====================================================================
+# recurses through recipes and adds up total cookTime 
+def recurse_recipes(item, summary, quantity):
+	global cookbook
+
+	curr_item = cookbook.get(item.name)
+	if curr_item is None: return False
+	
+	if isinstance(curr_item, Ingredient):
+		summary.cookTime += curr_item.cook_time * quantity 
+
+		existing_ingredient = None 
+		for ing in summary.ingredients:
+			if ing.name == item.name:
+				existing_ingredient = ing
+				break
+
+		if existing_ingredient: 
+			existing_ingredient.quantity += quantity
+		else:
+			addIngredient = RequiredItem(
+				name=item.name,
+				quantity=quantity,
+			)
+			summary.ingredients.append(addIngredient)
+	
+	if isinstance(curr_item, Recipe):
+		for sub_item in curr_item.required_items:
+			if not recurse_recipes(sub_item, summary, sub_item.quantity * quantity):
+				return False
+
+	return True
+
 # Endpoint that returns a summary of a recipe that corresponds to a query name
 @app.route('/summary', methods=['GET'])
 def summary():
-	# TODO: implement me
-	return 'not implemented', 500
+	recipe_name = request.args.get("name")
+	global cookbook
+
+	if not recipe_name or recipe_name not in cookbook:
+		return "recipe not found", 400
+
+	recipe = cookbook[recipe_name]
+
+	if not isinstance(recipe, Recipe):
+		return "recipe not found", 400
+
+	summary = RecipeSummary(
+		name=recipe_name,
+		cookTime=0,
+		ingredients=[]
+	)
+	for item in recipe.required_items:
+		if not recurse_recipes(item, summary, item.quantity):
+			return "recipe/ingredient not found", 400
+
+	return jsonify(summary.__dict__), 200
+	
 
 
 # =============================================================================
